@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% block title %}Hamroh{% endblock %}
+
+{% block header_extra %}
+  <form method="post" action="{{ url_for('auth_pages.logout') }}">
+    <button type="submit" class="flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-700">
+      {{ icon('log-out', 'w-4 h-4') }} <span class="hidden sm:inline">Chiqish</span>
+    </button>
+  </form>
+{% endblock %}
+
+{% block content %}
+<div class="bg-white rounded-2xl border border-slate-200 p-6 mb-4">
+  <span class="hamroh-mark w-11 h-11 mb-3">{{ icon('activity', 'w-5 h-5') }}</span>
+  <h1 class="font-display text-xl font-extrabold mb-1">Xush kelibsiz, {{ user['full_name'] or 'foydalanuvchi' }}</h1>
+  <p class="text-slate-500 text-sm">
+    Rolingiz: <span class="font-medium text-slate-700">{{ "Bemor" if user['role'] == "patient" else "Shifokor" }}</span>
+  </p>
+</div>
+
+<nav class="bg-white rounded-2xl border border-slate-200 divide-y divide-slate-100 overflow-hidden">
+  {% if user['role'] == 'doctor' %}
+    <a href="{{ url_for('doctor_profile_pages.profile_form') }}" class="flex items-center gap-3 px-4 py-3.5 hover:bg-slate-50 transition">
+      {{ icon('user', 'w-4.5 h-4.5 text-teal-600') }}
+      <span class="flex-1 text-sm font-medium">Profilni tahrirlash</span>
+      {{ icon('arrow-right', 'w-4 h-4 text-slate-300') }}
+    </a>
+    <a href="{{ url_for('doctor_patients_pages.list_patients') }}" class="flex items-center gap-3 px-4 py-3.5 hover:bg-slate-50 transition">
+      {{ icon('users', 'w-4.5 h-4.5 text-teal-600') }}
+      <span class="flex-1 text-sm font-medium">Bemorlarim</span>
+      {{ icon('arrow-right', 'w-4 h-4 text-slate-300') }}
+    </a>
+    <a href="{{ url_for('consultation_pages.doctor_list') }}" class="flex items-center gap-3 px-4 py-3.5 hover:bg-slate-50 transition">
+      {{ icon('message-circle', 'w-4.5 h-4.5 text-teal-600') }}
+      <span class="flex-1 text-sm font-medium">Konsultatsiyalar</span>
+      {{ icon('arrow-right', 'w-4 h-4 text-slate-300') }}
+    </a>
+  {% endif %}
+  {% if user['role'] == 'patient' %}
+    <a href="{{ url_for('patient_profile_pages.profile_form') }}" class="flex items-center gap-3 px-4 py-3.5 hover:bg-slate-50 transition">
+      {{ icon('user', 'w-4.5 h-4.5 text-teal-600') }}
+      <span class="flex-1 text-sm font-medium">Mening profilim</span>
+      {{ icon('arrow-right', 'w-4 h-4 text-slate-300') }}
+    </a>
+    <a href="{{ url_for('consultation_pages.patient_list') }}" class="flex items-center gap-3 px-4 py-3.5 hover:bg-slate-50 transition">
+      {{ icon('message-circle', 'w-4.5 h-4.5 text-teal-600') }}
+      <span class="flex-1 text-sm font-medium">Doktordan maslahat</span>
+      {{ icon('arrow-right', 'w-4 h-4 text-slate-300') }}
+    </a>
+  {% endif %}
+  {% if user['is_admin'] %}
+    <a href="{{ url_for('admin_pages.doctors') }}" class="flex items-center gap-3 px-4 py-3.5 hover:bg-slate-50 transition">
+      {{ icon('shield-check', 'w-4.5 h-4.5 text-teal-600') }}
+      <span class="flex-1 text-sm font-medium">Admin panel</span>
+      {{ icon('arrow-right', 'w-4 h-4 text-slate-300') }}
+    </a>
+  {% endif %}
+</nav>
+{% endblock %}

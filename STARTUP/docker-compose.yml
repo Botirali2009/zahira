@@ -1,0 +1,99 @@
+# Full HujjatAI stack for local development and pilot deployment.
+#
+#   docker compose up --build
+#   API   http://localhost:8000/docs
+#   Web   http://localhost:3000
+#
+# Document images stay on the `documents` volume (or MinIO), never on a foreign
+# cloud — see docs/data-residency.md for why that split matters legally.
+
+name: hujjatai
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: hujjat
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-hujjat-local-dev}
+      POSTGRES_DB: hujjatai
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hujjat -d hujjatai"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7-alpine
+    command: redis-server --save 60 1 --loglevel warning
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: ./backend
+    environment: &backend-env
+      HUJJAT_ENVIRONMENT: ${HUJJAT_ENVIRONMENT:-dev}
+      HUJJAT_SECRET_KEY: ${HUJJAT_SECRET_KEY:-change-me-before-any-real-customer}
+      HUJJAT_DATABASE_URL: postgresql+psycopg://hujjat:${POSTGRES_PASSWORD:-hujjat-local-dev}@postgres:5432/hujjatai
+      HUJJAT_REDIS_URL: redis://redis:6379/0
+      HUJJAT_QUEUE_BACKEND: celery
+      HUJJAT_STORAGE_BACKEND: local
+      HUJJAT_STORAGE_LOCAL_ROOT: /app/var/documents
+      HUJJAT_CORS_ORIGINS: http://localhost:3000,http://127.0.0.1:3000
+      # Optional: without these the pipeline still runs on the rule extractor
+      # and the PDF text layer, which covers born-digital e-invoices.
+      HUJJAT_GOOGLE_VISION_API_KEY: ${HUJJAT_GOOGLE_VISION_API_KEY:-}
+      HUJJAT_LLM_API_KEY: ${HUJJAT_LLM_API_KEY:-}
+      HUJJAT_EXTRACTION_STRATEGY: ${HUJJAT_EXTRACTION_STRATEGY:-auto}
+    volumes:
+      - documents:/app/var/documents
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    command: >
+      sh -c "alembic upgrade head &&
+             uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 2"
+
+  worker:
+    build:
+      context: ./backend
+    environment: *backend-env
+    volumes:
+      # The worker reads the same images the API wrote, so both mount the volume.
+      - documents:/app/var/documents
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    # Concurrency 2 per worker: OCR is CPU-bound, so more threads per container
+    # only adds contention. Scale with `docker compose up --scale worker=N`.
+    command: celery -A app.workers.tasks.celery_app worker --loglevel=info --concurrency=2
+
+  web:
+    build:
+      context: ./web
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+    depends_on:
+      - api
+    ports:
+      - "3000:3000"
+
+volumes:
+  postgres-data:
+  redis-data:
+  documents:

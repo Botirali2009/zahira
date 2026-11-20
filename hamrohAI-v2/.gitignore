@@ -1,0 +1,24 @@
+# Secrets
+.env
+
+# Database
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+
+# Uploaded files (doctor documents, diagnosis files — see core/files.py)
+/uploads/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+*.egg-info/
+
+# Editors / OS
+.DS_Store
+.idea/
+.vscode/

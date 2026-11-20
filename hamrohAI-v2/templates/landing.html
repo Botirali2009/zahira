@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% block title %}Hamroh — kasalxonadan keyingi hamrohingiz{% endblock %}
+
+{% block content %}
+<section class="relative overflow-hidden rounded-3xl bg-teal-700 text-white px-6 py-10 sm:px-10 sm:py-14 mb-10">
+  <div class="hamroh-pulse-bg">
+    <svg viewBox="0 0 640 200" fill="none"><polyline points="0,100 120,100 160,40 200,160 240,60 280,100 640,100" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+  <div class="relative max-w-lg">
+    <h1 class="font-display text-3xl sm:text-4xl font-extrabold leading-tight mb-3">
+      Kasalxonadan chiqqach ham,<br class="hidden sm:block"> hamrohingiz yoningizda.
+    </h1>
+    <p class="text-teal-50/90 text-sm sm:text-base mb-7 max-w-md">
+      Kunlik holatingiz, dori tartibingiz va shifokoringiz — bittasi yo'qolmaydigan bitta joyda.
+      Xavf sezilsa, shifokoringiz darhol bilib qoladi.
+    </p>
+    <a href="{{ url_for('auth_pages.login') }}"
+       class="inline-flex items-center gap-2 rounded-xl bg-white text-teal-800 px-5 py-3 font-display font-bold text-sm hover:bg-teal-50 transition">
+      Hisobga kirish {{ icon('arrow-right', 'w-4 h-4') }}
+    </a>
+  </div>
+</section>
+
+<div class="flex items-center gap-3 mb-6">
+  <span class="text-xs font-semibold uppercase tracking-wide text-slate-400">Yoki demo rejimida ko'rib chiqing</span>
+  <div class="h-px flex-1 bg-slate-200"></div>
+</div>
+
+<section class="mb-10">
+  <h2 class="text-sm font-semibold uppercase tracking-wide text-slate-500 mb-3 flex items-center gap-1.5">
+    {{ icon('heart', 'w-4 h-4 text-teal-600') }} Bemor sifatida
+  </h2>
+  <div class="grid gap-3 sm:grid-cols-2">
+    {% for p in patients %}
+      <a href="{{ url_for('pages.patient_chat', pid=p['id']) }}"
+         class="flex items-center gap-3 bg-white rounded-2xl border border-slate-200 p-4 hover:border-teal-400 hover:shadow-md shadow-slate-100 transition">
+        <span class="shrink-0 w-10 h-10 rounded-full bg-teal-50 text-teal-700 font-display font-bold flex items-center justify-center text-sm">
+          {{ p['full_name'][0] }}
+        </span>
+        <span class="min-w-0">
+          <span class="block font-medium truncate">{{ p['full_name'] }}</span>
+          <span class="block text-sm text-slate-500 truncate">{{ p['diagnosis'] }}</span>
+          <span class="block text-xs text-slate-400 mt-0.5">{{ p['current_day'] }}-kun</span>
+        </span>
+      </a>
+    {% else %}
+      <p class="text-slate-500 text-sm">Bemorlar topilmadi.</p>
+    {% endfor %}
+  </div>
+</section>
+
+<section>
+  <h2 class="text-sm font-semibold uppercase tracking-wide text-slate-500 mb-3 flex items-center gap-1.5">
+    {{ icon('shield-check', 'w-4 h-4 text-teal-600') }} Shifokor sifatida
+  </h2>
+  <div class="grid gap-3 sm:grid-cols-2">
+    {% for d in doctors %}
+      <a href="{{ url_for('pages.doctor_dashboard', did=d['id']) }}"
+         class="flex items-center gap-3 bg-white rounded-2xl border border-slate-200 p-4 hover:border-teal-400 hover:shadow-md shadow-slate-100 transition">
+        <span class="shrink-0 w-10 h-10 rounded-full bg-slate-100 text-slate-600 font-display font-bold flex items-center justify-center text-sm">
+          {{ d['full_name'][0] }}
+        </span>
+        <span class="min-w-0">
+          <span class="block font-medium truncate">{{ d['full_name'] }}</span>
+          <span class="block text-sm text-slate-500 truncate">{{ d['clinic_name'] }}</span>
+          <span class="block text-xs text-slate-400 mt-0.5">Panelga kirish</span>
+        </span>
+      </a>
+    {% else %}
+      <p class="text-slate-500 text-sm">Shifokorlar topilmadi.</p>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

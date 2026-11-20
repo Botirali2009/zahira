@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% block title %}Hamroh — kod yaratildi{% endblock %}
+
+{% block content %}
+<div class="max-w-sm mx-auto mt-8 text-center">
+  <div class="hamroh-mark w-12 h-12 mx-auto mb-5">{{ icon('check', 'w-5 h-5') }}</div>
+  <h1 class="font-display text-xl font-extrabold mb-1">{{ patient['full_name'] }} qo'shildi</h1>
+  <p class="text-slate-500 mb-6 text-sm">Bu kodni bemorga bering — ilovaga kirganda shu kodni kiritadi.</p>
+
+  <div class="bg-white rounded-2xl border-2 border-teal-500 p-6 mb-6">
+    <div class="text-3xl font-mono font-semibold tracking-widest text-teal-700">{{ code }}</div>
+  </div>
+
+  <a href="{{ url_for('doctor_patients_pages.list_patients') }}"
+     class="inline-flex items-center gap-2 rounded-xl bg-teal-600 text-white px-5 py-3 font-medium hover:bg-teal-700 transition">
+    Bemorlarimga qaytish {{ icon('arrow-right', 'w-4 h-4') }}
+  </a>
+</div>
+{% endblock %}

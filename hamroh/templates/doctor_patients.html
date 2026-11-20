@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Hamroh — bemorlarim{% endblock %}
+
+{% block header_extra %}
+  <a href="{{ url_for('auth_pages.app_home') }}" class="text-sm text-teal-700 hover:underline">← Bosh sahifa</a>
+{% endblock %}
+
+{% block content %}
+<div class="flex items-center justify-between mb-4">
+  <h1 class="text-2xl font-semibold">Bemorlarim</h1>
+  <a href="{{ url_for('doctor_patients_pages.add_form') }}"
+     class="text-sm rounded-lg bg-teal-600 text-white px-4 py-2 font-medium hover:bg-teal-700">
+    + Mijoz qo'shish
+  </a>
+</div>
+
+<section class="mb-8">
+  {% if not patients %}
+    <p class="text-slate-500">Hozircha bemor yo'q.</p>
+  {% endif %}
+  <div class="space-y-2">
+    {% for p in patients %}
+      <a href="{{ url_for('care_pages.patient_care', pid=p['id']) }}"
+         class="block bg-white rounded-xl border border-slate-200 p-4 hover:border-teal-500 hover:shadow-sm transition">
+        <div class="font-medium">{{ p['full_name'] }}</div>
+        <div class="text-sm text-slate-500">{{ p['diagnosis'] or '—' }} · {{ p['phone_sim'] or '—' }}</div>
+        <div class="text-xs text-slate-400 mt-1">
+          {% if p['user_id'] %}Ulangan{% else %}Kod kutilmoqda{% endif %}
+        </div>
+      </a>
+    {% endfor %}
+  </div>
+</section>
+
+<section>
+  <h2 class="text-sm font-semibold uppercase tracking-wide text-slate-500 mb-2">Yaratilgan kodlar</h2>
+  {% if not codes %}
+    <p class="text-slate-500 text-sm">Hozircha kod yo'q.</p>
+  {% endif %}
+  <div class="space-y-2">
+    {% for c in codes %}
+      <div class="bg-white rounded-xl border border-slate-200 p-3 flex items-center justify-between">
+        <div>
+          <div class="text-sm font-medium">{{ c['patient_name'] }}</div>
+          <code class="text-xs text-slate-500">{{ c['code'] }}</code>
+        </div>
+        <span class="text-xs font-medium {{ 'text-teal-700' if c['used'] else 'text-amber-700' }}">
+          {{ 'Ishlatilgan' if c['used'] else 'Kutilmoqda' }}
+        </span>
+      </div>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

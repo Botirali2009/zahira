@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Hamroh — mening profilim{% endblock %}
+
+{% block header_extra %}
+  <a href="{{ url_for('auth_pages.app_home') }}" class="text-sm text-teal-700 hover:underline">← Bosh sahifa</a>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-lg mx-auto space-y-4">
+  <h1 class="text-2xl font-semibold">Mening profilim</h1>
+
+  <form method="post" action="{{ url_for('patient_profile_pages.profile_submit') }}"
+        class="space-y-4 bg-white rounded-xl border border-slate-200 p-4">
+    <div>
+      <label class="block text-sm font-medium mb-1">Ism-familiya</label>
+      <input type="text" name="full_name" required value="{{ detail.patient.full_name or '' }}"
+             class="w-full rounded-lg border border-slate-300 px-3 py-3 text-base focus:outline-none focus:ring-2 focus:ring-teal-500">
+    </div>
+    <div>
+      <label class="block text-sm font-medium mb-1">Telefon</label>
+      <input type="tel" name="phone" value="{{ detail.patient.phone_sim or '' }}"
+             placeholder="+998 90 123 45 67"
+             class="w-full rounded-lg border border-slate-300 px-3 py-3 text-base focus:outline-none focus:ring-2 focus:ring-teal-500">
+    </div>
+    <button type="submit"
+            class="w-full rounded-lg bg-teal-600 text-white px-5 py-3 font-medium hover:bg-teal-700">
+      Saqlash
+    </button>
+  </form>
+
+  <div class="bg-white rounded-xl border border-slate-200 p-4">
+    <h2 class="text-sm font-semibold uppercase tracking-wide text-slate-500 mb-2">Shifokor</h2>
+    {% if detail.doctor %}
+      <p class="text-sm mb-3">
+        Siz <span class="font-medium">{{ detail.doctor.full_name }}</span> bilan bog'langansiz.
+      </p>
+      <form method="post" action="{{ url_for('patient_profile_pages.disconnect_doctor') }}">
+        <button type="submit" class="text-xs rounded-lg border border-slate-300 px-3 py-2 hover:bg-slate-100">
+          Shifokordan uzilish
+        </button>
+      </form>
+    {% else %}
+      <p class="text-sm text-slate-600 mb-3">Hali shifokoringiz yo'q.</p>
+      <form method="post" action="{{ url_for('patient_profile_pages.connect_doctor') }}" class="flex gap-2">
+        <input type="text" name="code" required autocomplete="off" autocapitalize="characters"
+               placeholder="Shifokor kodi"
+               class="flex-1 rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500">
+        <button type="submit" class="text-sm rounded-lg bg-teal-600 text-white px-4 py-2 font-medium hover:bg-teal-700">
+          Ulanish
+        </button>
+      </form>
+    {% endif %}
+  </div>
+
+  <a href="{{ url_for('care_pages.patient_care', pid=detail.patient.id) }}"
+     class="block text-center rounded-lg border border-slate-300 bg-white px-5 py-3 font-medium hover:bg-slate-50">
+    Dori va tashxislarim
+  </a>
+</div>
+{% endblock %}

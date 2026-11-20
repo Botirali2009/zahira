@@ -1,0 +1,109 @@
+"""Hamroh — application factory.
+
+`create_app()` loads config, runs migrations, registers blueprints and imports
+the hook modules so their `@on(...)` decorators fire. Adding a hook means
+adding a filename to HOOK_MODULES; adding an endpoint means adding a blueprint.
+"""
+
+import importlib
+import logging
+
+from flask import Flask
+
+from config import Config, features
+from core import db
+from core.errors import register_error_handlers
+from core.responses import ok
+
+# Extension modules imported for their side effects (decorator registration).
+# A new hook/analyzer/notifier = a new file listed here, nothing else changes.
+HOOK_MODULES = [
+    "hooks.analysis_hooks",
+    "hooks.alert_hooks",
+    "hooks.call_hooks",
+    "hooks.push_hooks",
+]
+ANALYZER_MODULES = [
+    "analyzers.rule_analyzer",
+    "analyzers.llm_analyzer",
+]
+NOTIFIER_MODULES = [
+    "notifiers.in_app",
+    "notifiers.call_notifier",
+    "notifiers.push_notifier",
+]
+
+# (import path, url_prefix or None)
+BLUEPRINTS = [
+    ("routes.pages:bp", None),
+    ("routes.demo_api:bp", "/api/v1/demo"),
+    ("routes.patient_api:bp", "/api/v1/patients"),
+    ("routes.doctor_api:bp", "/api/v1/doctors"),
+    ("routes.alert_api:bp", "/api/v1/alerts"),
+    ("routes.call_api:bp", "/api/v1/patients"),
+    ("routes.push_api:bp", "/api/v1/push"),
+]
+
+
+def _load_modules(app, names, kind):
+    for name in names:
+        try:
+            importlib.import_module(name)
+            app.logger.info("%s loaded: %s", kind, name)
+        except Exception:
+            # A broken optional extension must not stop the app from starting.
+            app.logger.exception("%s failed to load: %s", kind, name)
+
+
+def _register_blueprints(app):
+    for import_path, url_prefix in BLUEPRINTS:
+        module_name, _, attr = import_path.rpartition(":")
+        module = importlib.import_module(module_name)
+        blueprint = getattr(module, attr)
+        app.register_blueprint(blueprint, url_prefix=url_prefix)
+        app.logger.info("blueprint registered: %s", import_path)
+
+
+def create_app(config_object=Config):
+    app = Flask(__name__)
+    app.config.from_object(config_object)
+
+    logging.basicConfig(
+        level=logging.DEBUG if app.config.get("DEBUG") else logging.INFO,
+        format="%(asctime)s %(levelname)s %(name)s %(message)s",
+    )
+
+    db.init_app(app)  # teardown + run_migrations()
+
+    _load_modules(app, ANALYZER_MODULES, "analyzer")
+    _load_modules(app, NOTIFIER_MODULES, "notifier")
+    _load_modules(app, HOOK_MODULES, "hook")
+
+    _register_blueprints(app)
+    register_error_handlers(app)
+
+    @app.context_processor
+    def inject_features():
+        """Templates gate unfinished UI with features.enabled('...')."""
+        return {"features": features}
+
+    @app.get("/health")
+    def health():
+        return ok({
+            "status": "ok",
+            "db": app.config["DB_PATH"],
+            "features": features.as_dict(),
+        })
+
+    return app
+
+
+app = create_app()
+
+
+if __name__ == "__main__":
+    app.run(
+        host=app.config["HOST"],
+        port=app.config["PORT"],
+        debug=app.config["DEBUG"],
+    )

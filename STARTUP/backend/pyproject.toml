@@ -1,0 +1,47 @@
+[project]
+name = "hujjatai-backend"
+version = "0.1.0"
+description = "Uzbek-language document AI for 1C accounting"
+requires-python = ">=3.11"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+exclude = ["alembic/versions"]
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle
+    "F",    # pyflakes
+    "I",    # import sorting
+    "UP",   # pyupgrade
+    "B",    # bugbear
+    "C4",   # comprehensions
+    "SIM",  # simplify
+    "PL",   # pylint subset
+]
+ignore = [
+    "E501",     # line length is enforced by the formatter, not the linter
+    "PLR0913",  # extraction functions legitimately take many parameters
+    "PLR2004",  # confidence thresholds read better inline than as constants
+    "PLR0912",  # invoice layouts genuinely need many branches
+    "PLR0915",
+    "B008",     # FastAPI dependency injection relies on calls in defaults
+    "PLR0917",  # FastAPI injects route parameters by name, not position
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["PLR2004", "PLC0415"]
+"scripts/*" = ["E402"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+filterwarnings = [
+    "ignore::DeprecationWarning:starlette.*",
+    "ignore::DeprecationWarning:fastapi.*",
+]
+
+[tool.coverage.run]
+source = ["app"]
+omit = ["app/testing/*", "app/workers/*"]

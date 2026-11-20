@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% block title %}Hamroh — kodni kiriting{% endblock %}
+
+{% block content %}
+<div class="max-w-sm mx-auto mt-8">
+  <div class="hamroh-mark w-12 h-12 mx-auto mb-5">{{ icon('key', 'w-5 h-5') }}</div>
+  <h1 class="font-display text-2xl font-extrabold mb-1 text-center">Shifokor kodi</h1>
+  <p class="text-slate-500 mb-8 text-center text-sm">Shifokoringiz bergan kodni kiriting</p>
+
+  <form method="post" action="{{ url_for('patient_redeem_pages.redeem_submit') }}" class="space-y-3">
+    <input type="text" name="code" required autocomplete="off" autocapitalize="characters"
+           placeholder="ABCD123"
+           class="w-full text-center text-2xl font-mono tracking-[0.2em] rounded-xl border border-slate-300 px-3 py-4 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+    <button type="submit"
+            class="w-full rounded-xl bg-teal-600 text-white px-5 py-3.5 font-medium hover:bg-teal-700 transition">
+      Tasdiqlash
+    </button>
+  </form>
+
+  <p class="text-center text-sm text-slate-500 mt-6">
+    <a href="{{ url_for('auth_pages.role') }}" class="hover:text-teal-700 hover:underline">Kodim yo'q</a>
+  </p>
+</div>
+{% endblock %}

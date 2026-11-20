@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% block title %}Hamroh — rolni tanlash{% endblock %}
+
+{% block content %}
+<div class="max-w-sm mx-auto mt-8">
+  <h1 class="font-display text-2xl font-extrabold mb-1 text-center">Siz kimsiz?</h1>
+  <p class="text-slate-500 mb-8 text-center text-sm">Bu tanlovni keyinroq o'zgartirib bo'lmaydi</p>
+
+  <form method="post" action="{{ url_for('auth_pages.set_role') }}" class="space-y-3">
+    <button type="submit" name="role" value="patient"
+            class="w-full flex items-start gap-3 rounded-2xl border border-slate-200 bg-white p-4 text-left hover:border-teal-400 hover:shadow-md shadow-slate-100 transition">
+      <span class="shrink-0 w-10 h-10 rounded-xl bg-teal-50 text-teal-700 flex items-center justify-center">{{ icon('heart', 'w-5 h-5') }}</span>
+      <span>
+        <span class="block font-medium">Bemorman</span>
+        <span class="block text-sm text-slate-500">Davolanishimni kuzatib boraman</span>
+      </span>
+    </button>
+    <button type="submit" name="role" value="doctor"
+            class="w-full flex items-start gap-3 rounded-2xl border border-slate-200 bg-white p-4 text-left hover:border-teal-400 hover:shadow-md shadow-slate-100 transition">
+      <span class="shrink-0 w-10 h-10 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center">{{ icon('shield-check', 'w-5 h-5') }}</span>
+      <span>
+        <span class="block font-medium">Shifokorman</span>
+        <span class="block text-sm text-slate-500">Bemorlarimni kuzatib boraman</span>
+      </span>
+    </button>
+  </form>
+
+  <p class="text-center text-sm text-slate-500 mt-6">
+    Shifokoringizdan kod olganmisiz?
+    <a href="{{ url_for('patient_redeem_pages.redeem_form') }}" class="text-teal-700 font-medium hover:underline">Kodni kiriting</a>
+  </p>
+</div>
+{% endblock %}

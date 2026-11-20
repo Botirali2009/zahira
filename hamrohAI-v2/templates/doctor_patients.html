@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% block title %}Hamroh — bemorlarim{% endblock %}
+
+{% block header_extra %}
+  <a href="{{ url_for('auth_pages.app_home') }}" class="flex items-center gap-1 text-sm text-teal-700 hover:underline">
+    {{ icon('chevron-left', 'w-4 h-4') }} Bosh sahifa
+  </a>
+{% endblock %}
+
+{% block content %}
+<div class="flex items-center justify-between mb-4">
+  <h1 class="font-display text-2xl font-extrabold">Bemorlarim</h1>
+  <a href="{{ url_for('doctor_patients_pages.add_form') }}"
+     class="flex items-center gap-1.5 text-sm rounded-xl bg-teal-600 text-white px-4 py-2.5 font-medium hover:bg-teal-700 transition">
+    {{ icon('plus', 'w-4 h-4') }} Mijoz qo'shish
+  </a>
+</div>
+
+<section class="mb-8">
+  {% if not patients %}
+    <p class="text-slate-500 text-sm">Hozircha bemor yo'q.</p>
+  {% endif %}
+  <div class="space-y-2">
+    {% for p in patients %}
+      <a href="{{ url_for('care_pages.patient_care', pid=p['id']) }}"
+         class="flex items-center gap-3 bg-white rounded-2xl border border-slate-200 p-4 hover:border-teal-400 hover:shadow-md shadow-slate-100 transition">
+        <span class="shrink-0 w-10 h-10 rounded-full bg-teal-50 text-teal-700 font-display font-bold flex items-center justify-center text-sm">
+          {{ p['full_name'][0] }}
+        </span>
+        <span class="min-w-0 flex-1">
+          <span class="block font-medium truncate">{{ p['full_name'] }}</span>
+          <span class="block text-sm text-slate-500 truncate">{{ p['diagnosis'] or '—' }} · {{ p['phone_sim'] or '—' }}</span>
+        </span>
+        <span class="shrink-0 text-xs font-medium {{ 'text-teal-700' if p['user_id'] else 'text-amber-700' }}">
+          {% if p['user_id'] %}Ulangan{% else %}Kod kutilmoqda{% endif %}
+        </span>
+      </a>
+    {% endfor %}
+  </div>
+</section>
+
+<section>
+  <h2 class="text-sm font-semibold uppercase tracking-wide text-slate-500 mb-2">Yaratilgan kodlar</h2>
+  {% if not codes %}
+    <p class="text-slate-500 text-sm">Hozircha kod yo'q.</p>
+  {% endif %}
+  <div class="space-y-2">
+    {% for c in codes %}
+      <div class="bg-white rounded-2xl border border-slate-200 p-3.5 flex items-center justify-between">
+        <div>
+          <div class="text-sm font-medium">{{ c['patient_name'] }}</div>
+          <code class="text-xs text-slate-500 tracking-wide">{{ c['code'] }}</code>
+        </div>
+        <span class="text-xs font-medium rounded-full px-2.5 py-1 {{ 'bg-teal-50 text-teal-700' if c['used'] else 'bg-amber-50 text-amber-700' }}">
+          {{ 'Ishlatilgan' if c['used'] else 'Kutilmoqda' }}
+        </span>
+      </div>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}
